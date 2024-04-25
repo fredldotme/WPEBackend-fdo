@@ -41,6 +41,7 @@ public:
     void exportBuffer(const struct linux_dmabuf_buffer *dmabuf_buffer) override { }
     void exportBuffer(struct wl_resource* bufferResource, struct wl_shm_buffer* shmBuffer) override { }
     void exportEGLStreamProducer(struct wl_resource* bufferResource) override { }
+    void exportHybrisBuffer(struct server_wlegl_buffer*) override { }
 
     struct wpe_dmabuf_pool_entry* createDmabufPoolEntry() override
     {

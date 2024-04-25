@@ -92,6 +92,11 @@ void ViewBackend::exportEGLStreamProducer(struct wl_resource* bufferResource)
     m_clientBundle->exportEGLStreamProducer(bufferResource);
 }
 
+void ViewBackend::exportHybrisBuffer(struct server_wlegl_buffer* buffer)
+{
+    m_clientBundle->exportHybrisBuffer(buffer);
+}
+
 struct wpe_dmabuf_pool_entry* ViewBackend::createDmabufPoolEntry()
 {
     return m_clientBundle->createDmabufPoolEntry();

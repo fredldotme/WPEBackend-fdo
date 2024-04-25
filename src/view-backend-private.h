@@ -50,6 +50,7 @@ public:
     virtual void exportBuffer(const struct linux_dmabuf_buffer *dmabuf_buffer) = 0;
     virtual void exportBuffer(struct wl_resource* bufferResource, struct wl_shm_buffer* shmBuffer) = 0;
     virtual void exportEGLStreamProducer(struct wl_resource *bufferResource) = 0;
+    virtual void exportHybrisBuffer(struct server_wlegl_buffer*) = 0;
 
     virtual struct wpe_dmabuf_pool_entry* createDmabufPoolEntry() = 0;
     virtual void commitDmabufPoolEntry(struct wpe_dmabuf_pool_entry*) = 0;
@@ -71,6 +72,7 @@ public:
     void exportLinuxDmabuf(const struct linux_dmabuf_buffer *dmabuf_buffer) override;
     void exportShmBuffer(struct wl_resource* bufferResource, struct wl_shm_buffer* shmBuffer) override;
     void exportEGLStreamProducer(struct wl_resource*) override;
+    void exportHybrisBuffer(struct server_wlegl_buffer*) override;
 
     struct wpe_dmabuf_pool_entry* createDmabufPoolEntry() override;
     void commitDmabufPoolEntry(struct wpe_dmabuf_pool_entry*) override;

@@ -36,6 +36,7 @@ struct linux_dmabuf_buffer;
 struct wpe_dmabuf_pool_entry;
 struct wpe_video_plane_display_dmabuf_export;
 struct wpe_audio_packet_export;
+struct server_wlegl_buffer;
 
 namespace WS {
 
@@ -46,6 +47,7 @@ struct APIClient {
     virtual void exportLinuxDmabuf(const struct linux_dmabuf_buffer *dmabuf_buffer) = 0;
     virtual void exportShmBuffer(struct wl_resource*, struct wl_shm_buffer*) = 0;
     virtual void exportEGLStreamProducer(struct wl_resource*) = 0;
+    virtual void exportHybrisBuffer(struct server_wlegl_buffer*) = 0;
 
     virtual struct wpe_dmabuf_pool_entry* createDmabufPoolEntry() = 0;
     virtual void commitDmabufPoolEntry(struct wpe_dmabuf_pool_entry*) = 0;
@@ -82,6 +84,7 @@ struct Surface {
     struct wl_resource* bufferResource { nullptr };
     const struct linux_dmabuf_buffer* dmabufBuffer { nullptr };
     struct wl_shm_buffer* shmBuffer { nullptr };
+    struct server_wlegl_buffer* hybrisBuffer { nullptr };
 
     void commit()
     {

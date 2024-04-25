@@ -71,6 +71,10 @@ public:
         client->export_eglstream_producer_resource(data, bufferResource);
     }
 
+    void exportHybrisBuffer(struct server_wlegl_buffer*) override {
+        assert(!"should not be reached");
+    }
+
     struct wpe_dmabuf_pool_entry* createDmabufPoolEntry() override
     {
         assert(!"should not be reached");

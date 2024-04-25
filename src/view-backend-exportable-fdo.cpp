@@ -121,6 +121,11 @@ public:
         assert(!"should not be reached");
     }
 
+    void exportHybrisBuffer(struct server_wlegl_buffer*) override 
+    {
+        assert(!"should not be reached");
+    }
+
     struct wpe_dmabuf_pool_entry* createDmabufPoolEntry() override
     {
         assert(!"should not be reached");

@@ -27,9 +27,11 @@
 
 #include "exported-buffer-shm-private.h"
 #include "linux-dmabuf/linux-dmabuf.h"
+#include "linux-hybris/server_wlegl_buffer.h"
 #include "view-backend-exportable-fdo-egl-private.h"
 #include "view-backend-private.h"
 #include "ws-egl.h"
+#include "ws-hybrisegl.h"
 #include <epoxy/egl.h>
 #include <cassert>
 #include <list>
@@ -114,6 +116,11 @@ public:
     }
 
     void exportEGLStreamProducer(struct wl_resource* bufferResource) override
+    {
+        assert(!"should not be reached");
+    }
+
+    void exportHybrisBuffer(struct server_wlegl_buffer*) override
     {
         assert(!"should not be reached");
     }
@@ -232,6 +239,29 @@ public:
     void exportEGLStreamProducer(struct wl_resource* bufferResource) override
     {
         assert(!"should not be reached");
+    }
+
+    void exportHybrisBuffer(struct server_wlegl_buffer* buffer) override
+    {
+        if (auto* image = findImage(buffer->resource)) {
+            exportImage(image);
+            return;
+        }
+
+        EGLImageKHR eglImage = WS::instanceImpl<WS::ImplHybrisEGL>().createImage(buffer);
+        if (!eglImage)
+            return;
+
+        auto* image = new struct wpe_fdo_egl_exported_image;
+        image->eglImage = eglImage;
+        image->bufferResource = buffer->resource;
+        image->width = buffer->buf->width;
+        image->height = buffer->buf->height;
+        wl_list_init(&image->bufferDestroyListener.link);
+        image->bufferDestroyListener.notify = bufferDestroyListenerCallback;
+        wl_resource_add_destroy_listener(buffer->resource, &image->bufferDestroyListener);
+
+        exportImage(image);
     }
 
     struct wpe_dmabuf_pool_entry* createDmabufPoolEntry() override

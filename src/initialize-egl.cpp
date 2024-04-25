@@ -26,6 +26,7 @@
 #include "../include/wpe/initialize-egl.h"
 
 #include "ws-egl.h"
+#include "ws-hybrisegl.h"
 
 extern "C" {
 
@@ -33,11 +34,19 @@ __attribute__((visibility("default")))
 bool
 wpe_fdo_initialize_for_egl_display(EGLDisplay display)
 {
-    if (!WS::Instance::isConstructed())
-        WS::Instance::construct(std::unique_ptr<WS::ImplEGL>(new WS::ImplEGL));
+    if (!getenv("HYBRIS_EGLPLATFORM")) {
+        if (!WS::Instance::isConstructed())
+            WS::Instance::construct(std::unique_ptr<WS::ImplEGL>(new WS::ImplEGL));
 
-    auto& instance = WS::Instance::singleton();
-    return static_cast<WS::ImplEGL&>(instance.impl()).initialize(display);
+        auto& instance = WS::Instance::singleton();
+        return static_cast<WS::ImplEGL&>(instance.impl()).initialize(display);
+    } else {
+        if (!WS::Instance::isConstructed())
+            WS::Instance::construct(std::unique_ptr<WS::ImplHybrisEGL>(new WS::ImplHybrisEGL));
+
+        auto& instance = WS::Instance::singleton();
+        return static_cast<WS::ImplHybrisEGL&>(instance.impl()).initialize(display);
+    }
 }
 
 }

@@ -65,6 +65,29 @@ sources = [
 	'src/linux-dmabuf/linux-dmabuf-protocol.c',
 ]
 
+cxx = meson.get_compiler('cpp')
+
+android_dep = dependency('android-headers', required: false)
+hybris_dep = []
+hybris_common_lib = []
+if android_dep.found()
+	sources += [
+		'src/linux-hybris/nativewindowbase.cpp',
+		'src/linux-hybris/server_wlegl_buffer.cpp',
+		'src/linux-hybris/server_wlegl.cpp',
+		'src/linux-hybris/server_wlegl_handle.cpp',
+		'src/linux-hybris/windowbuffer.cpp',
+		'src/ws-hybrisegl.cpp',
+	]
+	hybris_dep = [
+		dependency('libgralloc', required: true),
+		dependency('libsync', required: true),
+	]
+	hybris_common_lib = [
+		cxx.find_library('hybris-common'),
+	]
+endif
+
 api_headers = [
 	'include/wpe/exported-buffer-shm.h',
 	'include/wpe/exported-image-egl.h',
@@ -225,7 +248,25 @@ wpe_dmabuf_pool_proto_source = custom_target(
 	command: [wayland_scanner, wayland_scanner_code, '@INPUT@', '@OUTPUT@'],
 )
 
-cxx = meson.get_compiler('cpp')
+# Wayland extension: libhybris buffer support
+wayland_android_client_proto_header = custom_target(
+        'wayland-android-client-proto-header',
+        input: 'src/linux-hybris/wayland-android.xml',
+        output: '@BASENAME@-client-protocol.h',
+        command: [wayland_scanner, 'client-header', '@INPUT@', '@OUTPUT@'],
+)
+wayland_android_server_proto_header = custom_target(
+        'wayland-android-server-proto-header',
+        input: 'src/linux-hybris/wayland-android.xml',
+        output: '@BASENAME@-server-protocol.h',
+        command: [wayland_scanner, 'server-header', '@INPUT@', '@OUTPUT@'],
+)
+wayland_android_proto_source = custom_target(
+        'wayland-android-proto-source',
+        input: 'src/linux-hybris/wayland-android.xml',
+        output: '@BASENAME@-protocol.c',
+        command: [wayland_scanner, wayland_scanner_code, '@INPUT@', '@OUTPUT@'],
+)
 
 # Switch to the 'cpp_eh=none' default option when updating to Meson 0.51 or newer, see
 # https://mesonbuild.com/Builtin-options.html
@@ -263,6 +304,9 @@ deps = [
 	dependency('wayland-client'),
 	dependency('wayland-server'),
         wpe_dep,
+	android_dep,
+	hybris_dep,
+	hybris_common_lib,
 ]
 
 # Will be set to the library dependency which provides the wl_egl_* functions.
@@ -319,6 +363,9 @@ generated_sources = [
 	wpe_dmabuf_pool_client_proto_header,
 	wpe_dmabuf_pool_server_proto_header,
 	wpe_dmabuf_pool_proto_source,
+	wayland_android_client_proto_header,
+	wayland_android_server_proto_header,
+	wayland_android_proto_source,
 ]
 
 lib = shared_library('WPEBackend-fdo-' + api_version,
