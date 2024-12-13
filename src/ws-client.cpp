@@ -233,8 +233,8 @@ void BaseTarget::initialize(BaseBackend& backend)
 
 void BaseTarget::requestFrame()
 {
-    if (m_wl.frameCallback)
-        g_error("BaseTarget::requestFrame(): A frame callback was already installed.");
+    //if (m_wl.frameCallback)
+    //    g_error("BaseTarget::requestFrame(): A frame callback was already installed.");
 
     m_wl.frameCallback = wl_surface_frame(m_wl.surface);
     wl_callback_add_listener(m_wl.frameCallback, &s_callbackListener, this);

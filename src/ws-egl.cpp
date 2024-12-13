@@ -159,12 +159,15 @@ EGLImageKHR ImplEGL::createImage(struct wl_resource* resourceBuffer)
     if (m_egl.display == EGL_NO_DISPLAY)
         return EGL_NO_IMAGE_KHR;
 
-    assert(m_egl.extensions.KHR_image_base);
+    // assert(m_egl.extensions.KHR_image_base);
     return s_eglCreateImageKHR(m_egl.display, EGL_NO_CONTEXT, EGL_WAYLAND_BUFFER_WL, resourceBuffer, nullptr);
 }
 
 EGLImageKHR ImplEGL::createImage(const struct linux_dmabuf_buffer* dmabufBuffer)
 {
+    if (!s_eglCreateImageKHR)
+        return EGL_NO_IMAGE_KHR;
+
     static const struct {
         EGLint fd;
         EGLint offset;
@@ -218,17 +221,19 @@ EGLImageKHR ImplEGL::createImage(const struct linux_dmabuf_buffer* dmabufBuffer)
 
     attribs[atti++] = EGL_NONE;
 
-    assert(m_egl.extensions.KHR_image_base);
+    // assert(m_egl.extensions.KHR_image_base);
     return s_eglCreateImageKHR(m_egl.display, EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, nullptr, attribs);
 }
 
 void ImplEGL::destroyImage(EGLImageKHR image)
 {
-    if (m_egl.display == EGL_NO_DISPLAY)
+    if (!m_egl.display || m_egl.display == EGL_NO_DISPLAY)
         return;
 
-    assert(m_egl.extensions.KHR_image_base);
-    s_eglDestroyImageKHR(m_egl.display, image);
+    // assert(m_egl.extensions.KHR_image_base);
+
+    if (s_eglDestroyImageKHR)
+        s_eglDestroyImageKHR(m_egl.display, image);
 }
 
 void ImplEGL::queryBufferSize(struct wl_resource* bufferResource, uint32_t* width, uint32_t* height)
@@ -283,7 +288,9 @@ void ImplEGL::foreachDmaBufModifier(std::function<void (int format, uint64_t mod
     if (m_egl.display == EGL_NO_DISPLAY)
         return;
 
-    assert(m_egl.extensions.EXT_image_dma_buf_import && m_egl.extensions.EXT_image_dma_buf_import_modifiers);
+    // assert(m_egl.extensions.EXT_image_dma_buf_import && m_egl.extensions.EXT_image_dma_buf_import_modifiers);
+    if (!s_eglQueryDmaBufFormatsEXT)
+        return;
 
     EGLint formats[128];
     EGLint numFormats;
