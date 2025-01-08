@@ -78,7 +78,7 @@ protected:
     void initialize(BaseBackend&);
 
 private:
-    void frameComplete();
+    void frameComplete(struct wl_callback* cb);
     void bridgeConnected(uint32_t bridgeID);
 
     static const struct wl_registry_listener s_registryListener;
@@ -102,7 +102,6 @@ private:
         uint32_t wpeBridgeId { 0 };
         struct wl_surface* surface { nullptr };
         struct wpe_dmabuf_pool* wpeDmabufPool { nullptr };
-        struct wl_callback* frameCallback { nullptr };
     } m_wl;
 };
 

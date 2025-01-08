@@ -185,7 +185,6 @@ BaseTarget::~BaseTarget()
     if (m_wl.wpeBridgeId && m_glib.socket)
         m_glib.socket->send(FdoIPC::Messages::UnregisterSurface, m_wl.wpeBridgeId);
 
-    g_clear_pointer(&m_wl.frameCallback, wl_callback_destroy);
     g_clear_pointer(&m_wl.surface, wl_surface_destroy);
     g_clear_pointer(&m_wl.wpeDmabufPool, wpe_dmabuf_pool_destroy);
 
@@ -234,16 +233,13 @@ void BaseTarget::initialize(BaseBackend& backend)
 
 void BaseTarget::requestFrame()
 {
-    //if (m_wl.frameCallback)
-    //    g_error("BaseTarget::requestFrame(): A frame callback was already installed.");
-
-    m_wl.frameCallback = wl_surface_frame(m_wl.surface);
-    wl_callback_add_listener(m_wl.frameCallback, &s_callbackListener, this);
+    auto frameCallback = wl_surface_frame(m_wl.surface);
+    wl_callback_add_listener(frameCallback, &s_callbackListener, this);
 }
 
-void BaseTarget::frameComplete()
+void BaseTarget::frameComplete(struct wl_callback * cb)
 {
-    g_clear_pointer(&m_wl.frameCallback, wl_callback_destroy);
+    g_clear_pointer(&cb, wl_callback_destroy);
     m_impl.dispatchFrameComplete();
 }
 
@@ -273,9 +269,9 @@ const struct wl_registry_listener BaseTarget::s_registryListener = {
 
 const struct wl_callback_listener BaseTarget::s_callbackListener = {
     // done
-    [](void* data, struct wl_callback*, uint32_t time)
+    [](void* data, struct wl_callback* cb, uint32_t time)
     {
-        static_cast<BaseTarget*>(data)->frameComplete();
+        static_cast<BaseTarget*>(data)->frameComplete(cb);
     },
 };
 
